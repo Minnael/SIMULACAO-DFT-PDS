@@ -12,7 +12,7 @@ from scipy.io.wavfile import write, read
 # ===============================================================
 
 # PARÂMETROS
-N = 512  # NÚMERO DE PONTOS DA FFT
+N = 1024  # NÚMERO DE PONTOS DA FFT
 M = 150  # TAMANHO DO FILTRO
 L = N - M + 1
 
@@ -80,8 +80,8 @@ y_voice = overlap_add(x_voice_to_filter, h_voice, N)
 # NORMALIZAR O SINAL FILTRADO PARA SALVAR SEM SATURAÇÃO
 y_voice = y_voice / np.max(np.abs(y_voice))
 
-# EXPORTAR RESULTADO FILTRADO
-write("voz_filtrada.wav", fs, np.int16(y_voice * 32767))  # SALVA ÁUDIO FILTRADO
+# SALVA ÁUDIO FILTRADO
+write("voz_filtrada.wav", fs, np.int16(y_voice * 32767))  
 
 # EXIBIR GRÁFICOS DO SINAL DE VOZ
 plot_signals(x_voice, h_voice, y_voice, "SINAL DE VOZ")
