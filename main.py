@@ -4,7 +4,7 @@ from function_noise import *
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import fftconvolve
+from scipy.signal import firwin, freqz
 from scipy.io.wavfile import write, read
 
 # ===============================================================
@@ -41,9 +41,6 @@ plt.ylabel("AMPLITUDE")
 plt.legend()
 plt.show()
 
-
-
-
 # ===============================================================
 # PASSO 2: SIMULAÇÃO COM SINAL DE VOZ
 # ===============================================================
@@ -51,7 +48,7 @@ plt.show()
 # CARREGANDO ARQUIVO DE VOZ QUE JÁ FOI UTILIZADO EM OUTROS TRABALHOS
 fs, x_voice = read("amostra.wav")  
 
-# NORMLIZANDO O ÁUDIO PARA EVITAR SATURAÇÃO
+# NORMALIZANDO O ÁUDIO PARA EVITAR SATURAÇÃO
 x_voice = x_voice / np.max(np.abs(x_voice))
 
 # ADICIONANDO RUÍDO AO SINAL DE VOZ
@@ -71,8 +68,20 @@ write("voz_com_ruido.wav", fs, np.int16(x_voice_noisy * 32767))  # SALVA ARQUIVO
 # GARANTIR QUE O ARQUIVO COM RUÍDO SEJA O PROCESSADO NO FILTRO
 x_voice_to_filter = x_voice_noisy  # USAR O SINAL COM RUÍDO PARA FILTRAGEM
 
-# FILTRO FIR PARA O SINAL DE VOZ
-h_voice = np.blackman(M)
+# FILTRO FIR PARA O SINAL DE VOZ (USANDO FIRWIN EM VEZ DE BLACKMAN)
+fc = 5000  # Frequência de corte (Hz) para preservar a fala
+h_voice = firwin(M, fc / (fs / 2), window="hamming")
+h_voice = h_voice / np.sum(h_voice)  # Normalizar para evitar alterações na amplitude
+
+# VISUALIZAR A RESPOSTA EM FREQUÊNCIA DO FILTRO
+w, H = freqz(h_voice, worN=8000, fs=fs)
+plt.figure()
+plt.plot(w, 20 * np.log10(np.abs(H)))
+plt.title("Resposta em Frequência do Filtro FIR")
+plt.xlabel("Frequência (Hz)")
+plt.ylabel("Magnitude (dB)")
+plt.grid()
+plt.show()
 
 # FILTRAGEM USANDO OVERLAP-ADD
 y_voice = overlap_add(x_voice_to_filter, h_voice, N)
@@ -88,11 +97,3 @@ plot_signals(x_voice, h_voice, y_voice, "SINAL DE VOZ")
 
 # EXIBIR GRÁFICOS COMPARATIVOS DOS SINAIS DE VOZ
 plot_signals_comparison(x_voice, x_voice_noisy, y_voice, fs)
-
-
-
-
-
-
-
-
