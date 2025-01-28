@@ -1,23 +1,25 @@
 from functions_convolve import *
 from functions_graph import *
 from function_noise import *
+from function_filter import *
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import firwin, freqz
 from scipy.io.wavfile import write, read
+import sounddevice as sd
 
 # ===============================================================
 # PASSO 1: SIMULAÇÃO INICIAL COM SINAIS ALEATÓRIOS
 # ===============================================================
 
-# PARÂMETROS
+# DEFINDO PARÂMETROS
 N = 1024  # NÚMERO DE PONTOS DA FFT
 M = 150  # TAMANHO DO FILTRO
 L = N - M + 1
 
 # GERARANDO SINAIS ALEATÓRIOS
-np.random.seed(42)
+#np.random.seed(42)
 x = np.random.randn(int(15.3 * L))  # SINAL DE ENTRADA
 h = np.random.randn(M)  # FILTRO FIR
 
@@ -48,14 +50,15 @@ plt.show()
 # CARREGANDO ARQUIVO DE VOZ QUE JÁ FOI UTILIZADO EM OUTROS TRABALHOS
 fs, x_voice = read("amostra.wav")  
 
+
 # NORMALIZANDO O ÁUDIO PARA EVITAR SATURAÇÃO
 x_voice = x_voice / np.max(np.abs(x_voice))
 
 # ADICIONANDO RUÍDO AO SINAL DE VOZ
-a1 = 0.5  # Amplitude da primeira senóide
-a2 = 0.3  # Amplitude da segunda senóide
-f1 = 5500  # Frequência da primeira senóide (Hz)
-f2 = 5800  # Frequência da segunda senóide (Hz)
+a1 = 0.5  
+a2 = 0.3  
+f1 = 5500  
+f2 = 5800  
 
 x_voice_noisy = add_sinusoidal_noise(x_voice, a1, f1, a2, f2, fs)
 
@@ -68,9 +71,15 @@ write("voz_com_ruido.wav", fs, np.int16(x_voice_noisy * 32767))  # SALVA ARQUIVO
 # GARANTIR QUE O ARQUIVO COM RUÍDO SEJA O PROCESSADO NO FILTRO
 x_voice_to_filter = x_voice_noisy  # USAR O SINAL COM RUÍDO PARA FILTRAGEM
 
-# FILTRO FIR PARA O SINAL DE VOZ (USANDO FIRWIN EM VEZ DE BLACKMAN)
-fc = 5000  # Frequência de corte (Hz) para preservar a fala
-h_voice = firwin(M, fc / (fs / 2), window="hamming")
+# FILTRO FIR PARA O SINAL DE VOZ (BLACKMAN)
+fc = 4500  # Frequência de corte (Hz)
+wc = 2 * np.pi * fc / fs  # Frequência de corte normalizada
+
+# Geração dos coeficientes do filtro FIR com janela de Blackman
+h_voice = np.zeros(M)
+
+function_filter(h_voice, M, wc) 
+
 h_voice = h_voice / np.sum(h_voice)  # Normalizar para evitar alterações na amplitude
 
 # VISUALIZAR A RESPOSTA EM FREQUÊNCIA DO FILTRO

@@ -1,12 +1,12 @@
 import numpy as np
 
 # Parâmetros do ruído
-a1 = 0.5  # Amplitude da primeira senóide
-a2 = 0.3  # Amplitude da segunda senóide
-f1 = 5500  # Frequência da primeira senóide (Hz)
-f2 = 5800 # Frequência da segunda senóide (Hz)
-fs = 13000 # Taxa de amostragem (Hz)
-duration = 5  # Duração do sinal (segundos)
+a1 = 0.5  
+a2 = 0.3  
+f1 = 5500 
+f2 = 5800
+fs = 13000 
+duration = 5  
 
 # Vetor de tempo
 t = np.linspace(0, duration, int(fs * duration), endpoint=False)
